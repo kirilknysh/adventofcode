@@ -16,32 +16,23 @@ function canReact(unit0, unit1) {
     return Math.abs(unit0 - unit1) === UNIT_REACTION_DIFF;
 }
 
-function compressPolymer(units) {
+function compress(polymer, units) {
     return units.reduce((polymer, unit) => {
-        if (!polymer.length) {
-            polymer.push(unit);
-        } else if (canReact(polymer[polymer.length - 1], unit)) {
+        if (polymer.length && canReact(polymer[polymer.length - 1], unit)) {
             polymer.pop();
         } else {
             polymer.push(unit);
         }
 
         return polymer;
-    }, []);
+    }, polymer);
 }
 
-function parseUnits(units, chars) {
+function parseUnits(polymer, chars) {
     const validUnits = chars.map(char => char.charCodeAt(0))
         .filter(code => code >= UNIT_MIN_VALID_CODE && code <= UNIT_MAX_VALID_CODE);
 
-    units.push(...validUnits);
-}
-
-function readUnits() {
-    const units = [];
-
-    return input.readChars(inputFilePath, parseUnits.bind(null, units))
-        .then(() => units);
+    compress(polymer, validUnits);
 }
 
 function findShortest(units) {
@@ -51,7 +42,7 @@ function findShortest(units) {
         const filteredUnits = units.filter((unit) => {
             return (unit !== i) && !canReact(unit, i);
         });
-        const polymer = compressPolymer(filteredUnits);
+        const polymer = compress([], filteredUnits);
 
         if (!shortest || shortest.length > polymer.length) {
             shortest = polymer;
@@ -61,13 +52,18 @@ function findShortest(units) {
     return shortest;
 }
 
-function findPolymer() {
-    return readUnits().then((units) => {
-        const compressedPolymer = compressPolymer(units);
+function readPolymer() {
+    const polymer = [];
 
-        result('[05.0]', compressedPolymer.length, 10180);
-        result('[05.1]', findShortest(compressedPolymer).length, 5668);
-    })
+    return input.readChars(inputFilePath, parseUnits.bind(null, polymer))
+        .then(() => polymer);
+}
+
+function findPolymer() {
+    return readPolymer().then((polymer) => {
+        result('[05.0]', polymer.length, 10180);
+        result('[05.1]', findShortest(polymer).length, 5668);
+    });
 }
 
 findPolymer();
