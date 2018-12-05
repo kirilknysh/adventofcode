@@ -30,7 +30,7 @@ function compress(polymer, units) {
 
 function parseUnits(polymer, chars) {
     const validUnits = chars.map(char => char.charCodeAt(0))
-        .filter(code => code >= UNIT_MIN_VALID_CODE && code <= UNIT_MAX_VALID_CODE);
+        .filter(code => (code >= UNIT_MIN_VALID_CODE && code <= UNIT_MAX_VALID_CODE));
 
     compress(polymer, validUnits);
 }
@@ -39,9 +39,7 @@ function findShortest(units) {
     let shortest = null;
 
     for (let i = UNIT_MIN_VALID_CODE; i <= UNIT_MEDIAN_CODE; i++) {
-        const filteredUnits = units.filter((unit) => {
-            return (unit !== i) && !canReact(unit, i);
-        });
+        const filteredUnits = units.filter((unit) => ((unit !== i) && !canReact(unit, i)));
         const polymer = compress([], filteredUnits);
 
         if (!shortest || shortest.length > polymer.length) {

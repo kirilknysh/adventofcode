@@ -41,7 +41,7 @@ function info(...messages) {
         return;
     }
 
-    console.log('[INFO]', ...messages);
+    console.log('[INFO]', ...messages); /* eslint-disable-line no-console */
 }
 
 function debug(...messages) {
@@ -49,7 +49,7 @@ function debug(...messages) {
         return;
     }
 
-    console.log('\x1b[33m[DEBUG]\x1b[0m', ...messages);
+    console.log('\x1b[33m[DEBUG]\x1b[0m', ...messages); /* eslint-disable-line no-console */
 }
 
 function result(prefix, actual, expected) {
@@ -57,7 +57,7 @@ function result(prefix, actual, expected) {
         deepStrictEqual(actual, expected);
     }
 
-    console.log('\x1b[32m[RESULT]\x1b[0m', prefix, actual);
+    console.log('\x1b[32m[RESULT]\x1b[0m', prefix, actual); /* eslint-disable-line no-console */
 }
 
 module.exports = {
