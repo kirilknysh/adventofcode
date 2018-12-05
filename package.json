@@ -1,0 +1,14 @@
+{
+  "name": "adventofcode",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "author": "",
+  "license": "ISC",
+  "private": true,
+  "devDependencies": {
+    "eslint": "^5.9.0",
+    "eslint-config-2123": "github:21-23/eslint-config-2123"
+  }
+}
