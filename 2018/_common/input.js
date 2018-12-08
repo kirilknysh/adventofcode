@@ -2,12 +2,17 @@ const fs = require('fs');
 const os = require('os');
 
 function parseLines(str) {
-    const boxIds = str.split(os.EOL);
-    return [boxIds, boxIds.pop()];
+    const lines = str.split(os.EOL);
+    return [lines, lines.pop()];
 }
 
 function parseChars(str) {
     return str.split('');
+}
+
+function parseNumbers(str) {
+    const numbers = str.replace(os.EOL, ' ').split(' ');
+    return [numbers, numbers.pop()];
 }
 
 function read(path, action) {
@@ -35,4 +40,16 @@ exports.readChars = function (path, action) {
     return read(path, (str, stream) => {
         action(parseChars(str), stream);
     });
+};
+
+// assumption: numbers are white-space separated
+exports.readNumbers = function (path, action) {
+    let inputStr = '';
+
+    return read(path, (str, stream) => {
+        let numbers = [];
+        [numbers, inputStr] = parseNumbers(inputStr + str);
+
+        action(numbers.map(number => +number), stream);
+    })
 };

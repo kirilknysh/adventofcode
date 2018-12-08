@@ -7,62 +7,51 @@ setupFromArgv(process.argv);
 
 const inputFilePath = path.resolve(__dirname, './input.txt');
 
-function parseLicense(license, lines) {
-    lines.reduce((license, line) => {
-        license.push(...line.split(' ').map(char => +char));
-        return license;
-    }, license);
+function createNode(parent) {
+    return { header: { child: -1, meta: -1 }, children: [], metadata: [], value: 0, parent };
 }
 
-function readLicense() {
-    const license = [];
-
-    return input.readLines(inputFilePath, parseLicense.bind(null, license))
-        .then(() => license);
-}
-
-function buildTree(license, tree) {
-    const node = { header: { child: -1, meta: -1 }, children: [], metadata: [], value: 0 };
-
-    if (!tree.root) {
-        tree.root = node;
-    }
-
-    node.header.child = license[tree.index];
-    node.header.meta = license[tree.index + 1];
-    tree.index += 2;
-
-    if (node.header.child > 0) {
-        for (let i = 0; i < node.header.child; i++) {
-            node.children.push(buildTree(license, tree));
-        }
-    }
-    if (node.header.meta > 0) {
-        for (let i = 0; i < node.header.meta; i++) {
-            const meta = license[tree.index++];
-            node.metadata.push(meta);
-            tree.metaSum += meta;
-        }
-    }
-
+function calculateNodeValue(node) {
     if (node.header.child === 0) {
-        node.value = node.metadata.reduce((sum, meta) => sum + meta, 0);
-    } else {
-        node.value = node.metadata.reduce((sum, meta) => {
-            if (meta > node.children.length) {
-                return sum;
-            }
-            return sum + node.children[meta - 1].value;
-        }, 0);
+        return node.metadata.reduce((sum, meta) => sum + meta, 0);
     }
+    return node.metadata.reduce((sum, meta) => {
+        if (meta > node.children.length) {
+            return sum;
+        }
+        return sum + node.children[meta - 1].value;
+    }, 0);
+}
 
-    return node;
+function processChars(tree, numbers) {
+    numbers.forEach((number) => {
+        if (tree.node.header.child < 0) {
+            tree.node.header.child = number;
+        } else if (tree.node.header.meta < 0) {
+            tree.node.header.meta = number;
+        } else if (tree.node.children.length < tree.node.header.child) {
+            const child = createNode(tree.node);
+            child.header.child = number;
+            tree.node.children.push(child);
+            tree.node = child;
+        } else if (tree.node.metadata.length < tree.node.header.meta) {
+            tree.node.metadata.push(number);
+            tree.metaSum += number;
+        }
+
+        // node is fully processed
+        if (tree.node.metadata.length === tree.node.header.meta) {
+            tree.node.value = calculateNodeValue(tree.node);
+            tree.node = tree.node.parent;
+        }
+    });
 }
 
 function buildLicense() {
-    return readLicense().then((license) => {
-        const tree = { root: null, index: 0, metaSum: 0 };
-        buildTree(license, tree);
+    const root = createNode(null);
+    const tree = { root, metaSum: 0, node: root };
+
+    return input.readNumbers(inputFilePath, processChars.bind(null, tree)).then(() => {
         return tree;
     });
 }
